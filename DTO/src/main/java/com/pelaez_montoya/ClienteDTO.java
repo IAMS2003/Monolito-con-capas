@@ -1,6 +1,6 @@
 package com.pelaez_montoya;
 
-public class Cliente {
+public class ClienteDTO {
     private Integer documentoIdentidad;
     private String nombre;
     private String apellido;
@@ -8,7 +8,7 @@ public class Cliente {
     private String correo;
     private String telefono;
 
-    public Cliente(Builder builder){
+    public ClienteDTO(Builder builder){
         this.documentoIdentidad = builder.documentoIdentidad;
         this.nombre = builder.nombre;
         this.apellido = builder.apellido;
@@ -55,8 +55,8 @@ public class Cliente {
             return this;
         }
 
-        public Cliente build(){
-            return new Cliente(this);
+        public ClienteDTO build(){
+            return new ClienteDTO(this);
         }
     }
 
