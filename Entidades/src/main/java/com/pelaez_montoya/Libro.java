@@ -8,14 +8,14 @@ public class Libro {
 
     public Libro(Builder builder){
         this.idLibro = builder.idLibro;
-        this.titulo = builder.nombre;
+        this.titulo = builder.titulo;
         this.autor = builder.autor;
         this.editorial = builder.editorial;
     }
 
     public static class Builder {
         private Integer idLibro;
-        private String nombre;
+        private String titulo;
         private String autor;
         private String editorial;
 
@@ -24,8 +24,8 @@ public class Libro {
             return this;
         }
 
-        public Builder nombre(String nombre) {
-            this.nombre = nombre;
+        public Builder titulo(String titulo) {
+            this.titulo = titulo;
             return this;
         }
 

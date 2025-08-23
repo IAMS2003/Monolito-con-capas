@@ -5,46 +5,35 @@ public class LibroDTO {
     private String autor;
     private String editorial;
 
-    public LibroDTO(Builder builder){
-        this.titulo = builder.nombre;
-        this.autor = builder.autor;
-        this.editorial = builder.editorial;
-    }
+    public LibroDTO() {}
 
-    public static class Builder {
-        private String nombre;
-        private String autor;
-        private String editorial;
-
-        public Builder nombre(String nombre) {
-            this.nombre = nombre;
-            return this;
-        }
-
-        public Builder autor(String autor) {
-            this.autor = autor;
-            return this;
-        }
-
-        public Builder editorial(String editorial) {
-            this.editorial = editorial;
-            return this;
-        }
-
-        public LibroDTO build(){
-            return new LibroDTO(this);
-        }
+    public LibroDTO(String titulo, String autor, String editorial) {
+        this.titulo = titulo;
+        this.autor = autor;
+        this.editorial = editorial;
     }
 
     public String getTitulo() {
         return titulo;
     }
 
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
     public String getAutor() {
         return autor;
     }
 
+    public void setAutor(String autor) {
+        this.autor = autor;
+    }
+
     public String getEditorial() {
         return editorial;
+    }
+
+    public void setEditorial(String editorial) {
+        this.editorial = editorial;
     }
 }
