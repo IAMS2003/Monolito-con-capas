@@ -10,9 +10,17 @@ import java.util.Optional;
 public class ReservaLibroController {
 
     private final ReservaLibroService reservaService;
+    private static ReservaLibroController instance;
 
-    public ReservaLibroController(ReservaLibroService reservaService) {
-        this.reservaService = reservaService;
+    private ReservaLibroController() throws SQLException, ClassNotFoundException {
+        this.reservaService = ReservaLibroService.getInstance();
+    }
+
+    public static ReservaLibroController getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new ReservaLibroController();
+        }
+        return instance;
     }
 
     public void crearReserva(ReservaLibroDTO dto) throws SQLException {

@@ -9,9 +9,17 @@ import java.util.Optional;
 public class LibroController {
 
     private final LibroService libroService;
+    private static LibroController instance;
 
-    public LibroController(LibroService libroService) {
-        this.libroService = libroService;
+    private LibroController() throws SQLException, ClassNotFoundException {
+        this.libroService = LibroService.getInstance();
+    }
+
+    public static LibroController getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new LibroController();
+        }
+        return instance;
     }
 
     public void crearLibro(LibroDTO dto) throws SQLException {

@@ -11,9 +11,17 @@ import java.util.Optional;
 public class ClienteDAO {
 
     private final ConexionDB conexionDB;
+    private static ClienteDAO instance;
 
-    public ClienteDAO(ConexionDB conexionDB) {
-        this.conexionDB = conexionDB;
+    private ClienteDAO() throws SQLException, ClassNotFoundException {
+        this.conexionDB = ConexionDB.getInstance();
+    }
+
+    public static ClienteDAO getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new ClienteDAO();
+        }
+        return instance;
     }
 
     public void guardar(Cliente cliente) throws SQLException {

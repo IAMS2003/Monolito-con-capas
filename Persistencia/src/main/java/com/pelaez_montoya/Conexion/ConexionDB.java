@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.SQLOutput;
 
 public class ConexionDB {
-    private static final String URL = "jdbc:h2:mem:Biblioteca;DB_CLOSE_DELAY=-1";
+    private static final String URL = "jdbc:h2:./data/biblioteca;AUTO_SERVER=TRUE";
     private static final String USER = "sa";
     private static final String PASS = "";
     private static ConexionDB instance;
@@ -29,7 +29,10 @@ public class ConexionDB {
         return instance;
     }
 
-    public Connection getConnection() {
+    public Connection getConnection() throws SQLException {
+        if (instance.conexion.isClosed()) {
+            instance.conexion = DriverManager.getConnection(URL, USER, PASS);
+        }
         return this.conexion;
     }
 }

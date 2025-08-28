@@ -3,6 +3,7 @@ package com.pelaez_montoya;
 import java.util.Date;
 
 public class ReservaLibroDTO {
+    private Integer idReserva;
     private Integer idLibro;
     private Integer idCliente;
     private Date fechaReserva;
@@ -10,16 +11,19 @@ public class ReservaLibroDTO {
 
     public ReservaLibroDTO() {}
 
-    public ReservaLibroDTO(Integer idLibro, Integer idCliente, Date fechaReserva, Date fechaDevolucion) {
+    public ReservaLibroDTO(Integer idReserva, Integer idLibro, Integer idCliente, Date fechaReserva, Date fechaDevolucion) {
+        this.idReserva = idReserva;
         this.idLibro = idLibro;
         this.idCliente = idCliente;
         this.fechaReserva = fechaReserva;
         this.fechaDevolucion = fechaDevolucion;
     }
 
-    public Integer getIdLibro() {
-        return idLibro;
-    }
+    public Integer getIdReserva() { return idReserva; }
+
+    public void setIdReserva(Integer idReserva) { this.idReserva = idReserva; }
+
+    public Integer getIdLibro() { return idLibro; }
 
     public void setIdLibro(Integer idLibro) {
         this.idLibro = idLibro;

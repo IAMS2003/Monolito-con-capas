@@ -14,17 +14,25 @@ public class LibroService {
 
     private final LibroDAO libroDAO;
     private final LibroFabrica libroFabrica;
+    private static LibroService instance;
 
-    public LibroService(LibroDAO libroDAO, LibroFabrica libroFabrica) {
-        this.libroDAO = libroDAO;
-        this.libroFabrica = libroFabrica;
+    private LibroService() throws SQLException, ClassNotFoundException {
+        this.libroDAO = LibroDAO.getInstance();
+        this.libroFabrica = LibroFabrica.getInstance();
+    }
+
+    public static LibroService getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new LibroService();
+        }
+        return instance;
     }
 
     public LibroDTO crearLibro(LibroDTO dto) throws SQLException {
         validarLibroDTO(dto);
 
         Libro libroSinId = libroFabrica.crearLibro(
-                null,
+                dto.getISBN(),
                 dto.getTitulo(),
                 dto.getAutor(),
                 dto.getEditorial()
@@ -46,16 +54,16 @@ public class LibroService {
                 .collect(Collectors.toList());
     }
 
-    public LibroDTO actualizarLibro(Integer idLibro, LibroDTO dto) throws SQLException {
-        Optional<Libro> libroExistente = libroDAO.findById(idLibro);
+    public LibroDTO actualizarLibro(Integer ISBN, LibroDTO dto) throws SQLException {
+        Optional<Libro> libroExistente = libroDAO.findById(ISBN);
         if (libroExistente.isEmpty()) {
-            throw new IllegalArgumentException("Libro con ID " + idLibro + " no encontrado.");
+            throw new IllegalArgumentException("Libro con ID " + ISBN + " no encontrado.");
         }
 
         validarLibroDTO(dto);
 
         Libro libro = libroFabrica.crearLibro(
-                idLibro,
+                ISBN,
                 dto.getTitulo(),
                 dto.getAutor(),
                 dto.getEditorial()
@@ -69,13 +77,13 @@ public class LibroService {
         return dto;
     }
 
-    public void eliminarLibro(Integer idLibro) throws SQLException {
-        Optional<Libro> libro = libroDAO.findById(idLibro);
+    public void eliminarLibro(Integer ISBN) throws SQLException {
+        Optional<Libro> libro = libroDAO.findById(ISBN);
         if (libro.isEmpty()) {
-            throw new IllegalArgumentException("Libro con ID " + idLibro + " no encontrado.");
+            throw new IllegalArgumentException("Libro con ID " + ISBN + " no encontrado.");
         }
 
-        boolean eliminado = libroDAO.eliminar(idLibro);
+        boolean eliminado = libroDAO.eliminar(ISBN);
         if (!eliminado) {
             throw new SQLException("Error al eliminar el libro.");
         }
@@ -95,6 +103,7 @@ public class LibroService {
 
     private LibroDTO toDTO(Libro libro) {
         return new LibroDTO(
+                libro.getISBN(),
                 libro.getTitulo(),
                 libro.getAutor(),
                 libro.getEditorial()

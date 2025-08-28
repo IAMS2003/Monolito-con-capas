@@ -1,26 +1,26 @@
 package com.pelaez_montoya;
 
 public class Libro {
-    private Integer idLibro;
+    private Integer ISBN;
     private String titulo;
     private String autor;
     private String editorial;
 
     public Libro(Builder builder){
-        this.idLibro = builder.idLibro;
+        this.ISBN = builder.ISBN;
         this.titulo = builder.titulo;
         this.autor = builder.autor;
         this.editorial = builder.editorial;
     }
 
     public static class Builder {
-        private Integer idLibro;
+        private Integer ISBN;
         private String titulo;
         private String autor;
         private String editorial;
 
-        public Builder idLibro(Integer idLibro) {
-            this.idLibro = idLibro;
+        public Builder ISBN(Integer ISBN) {
+            this.ISBN = ISBN;
             return this;
         }
 
@@ -44,9 +44,7 @@ public class Libro {
         }
     }
 
-    public Integer getIdLibro() {
-        return idLibro;
-    }
+    public Integer getISBN() { return ISBN; }
 
     public String getTitulo() {
         return titulo;

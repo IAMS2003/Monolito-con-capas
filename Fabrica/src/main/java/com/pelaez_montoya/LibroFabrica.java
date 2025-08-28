@@ -12,9 +12,9 @@ public class LibroFabrica {
         return instance;
     }
 
-    public Libro crearLibro(Integer idLibro, String titulo, String autor, String editorial) {
+    public Libro crearLibro(Integer ISBN, String titulo, String autor, String editorial) {
         return new Libro.Builder()
-                .idLibro(idLibro)
+                .ISBN(ISBN)
                 .titulo(titulo)
                 .autor(autor)
                 .editorial(editorial)

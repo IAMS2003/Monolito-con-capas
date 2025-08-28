@@ -26,7 +26,7 @@ public class Cliente {
         private String telefono;
 
         public Builder documentoIdentidad(Integer documentoIdentidad){
-            this.documentoIdentidad = this.documentoIdentidad;
+            this.documentoIdentidad = documentoIdentidad;
             return this;
         }
 

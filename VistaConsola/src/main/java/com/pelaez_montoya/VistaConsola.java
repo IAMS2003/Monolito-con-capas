@@ -20,13 +20,10 @@ public class VistaConsola {
     private final ReservaLibroController reservaLibroController;
     private final Scanner scanner;
 
-    public VistaConsola(ClienteController clienteController,
-                        LibroController libroController,
-                        ReservaLibroController reservaLibroController,
-                        Scanner scanner) {
-        this.clienteController = clienteController;
-        this.libroController = libroController;
-        this.reservaLibroController = reservaLibroController;
+    public VistaConsola(Scanner scanner) throws SQLException, ClassNotFoundException {
+        this.clienteController = ClienteController.getInstance();
+        this.libroController = LibroController.getInstance();
+        this.reservaLibroController = ReservaLibroController.getInstance();
         this.scanner = scanner;
     }
 
@@ -126,7 +123,7 @@ public class VistaConsola {
             System.out.println("No hay clientes registrados.");
         } else {
             System.out.println("Clientes registrados:");
-            clientes.forEach(c -> System.out.println("   • " + c.getNombre() + " " + c.getApellido() + " (" + c.getDocumentoIdentidad() + ")"));
+            clientes.forEach(c -> System.out.println("   • " + c.getDocumentoIdentidad() + c.getNombre() + " " + c.getApellido() + " (" + c.getDocumentoIdentidad() + ")"));
         }
     }
 
@@ -191,6 +188,8 @@ public class VistaConsola {
     }
 
     private void crearLibro() throws SQLException {
+        System.out.print("ISBN: ");
+        Integer ISBN = Integer.valueOf(scanner.nextLine());
         System.out.print("Título: ");
         String titulo = scanner.nextLine();
         System.out.print("Autor: ");
@@ -198,17 +197,17 @@ public class VistaConsola {
         System.out.print("Editorial: ");
         String editorial = scanner.nextLine();
 
-        LibroDTO dto = new LibroDTO(titulo, autor, editorial);
+        LibroDTO dto = new LibroDTO(ISBN, titulo, autor, editorial);
         libroController.crearLibro(dto);
         System.out.println("Libro creado exitosamente.");
     }
 
     private void buscarLibro() throws SQLException {
-        System.out.print("ID del libro: ");
-        Integer id = scanner.nextInt();
+        System.out.print("ISBN del libro: ");
+        Integer ISBN = scanner.nextInt();
         scanner.nextLine();
 
-        libroController.obtenerPorId(id)
+        libroController.obtenerPorId(ISBN)
                 .ifPresentOrElse(
                         l -> System.out.println("Libro encontrado: " + l.getTitulo() + " - " + l.getAutor()),
                         () -> System.out.println("Libro no encontrado.")
@@ -221,13 +220,13 @@ public class VistaConsola {
             System.out.println("No hay libros registrados.");
         } else {
             System.out.println("Libros disponibles:");
-            libros.forEach(l -> System.out.println("   • " + l.getTitulo() + " - " + l.getAutor()));
+            libros.forEach(l -> System.out.println("   • ISBN " + l.getISBN() + " Titulo " + l.getTitulo() + " - " + l.getAutor()));
         }
     }
 
     private void actualizarLibro() throws SQLException {
-        System.out.print("ID del libro: ");
-        Integer id = scanner.nextInt();
+        System.out.print("ISBN del libro: ");
+        Integer ISBN = scanner.nextInt();
         scanner.nextLine();
 
         System.out.print("Nuevo título: ");
@@ -237,8 +236,8 @@ public class VistaConsola {
         System.out.print("Nueva editorial: ");
         String editorial = scanner.nextLine();
 
-        LibroDTO dto = new LibroDTO(titulo, autor, editorial);
-        libroController.actualizarLibro(id, dto);
+        LibroDTO dto = new LibroDTO(ISBN, titulo, autor, editorial);
+        libroController.actualizarLibro(ISBN, dto);
         System.out.println("Libro actualizado.");
     }
 
@@ -281,8 +280,8 @@ public class VistaConsola {
     }
 
     private void crearReserva() throws SQLException {
-        System.out.print("ID del libro: ");
-        Integer idLibro = scanner.nextInt();
+        System.out.print("ISBN del libro: ");
+        Integer ISBN = scanner.nextInt();
         System.out.print("Documento del cliente: ");
         Integer idCliente = scanner.nextInt();
         scanner.nextLine();
@@ -294,7 +293,7 @@ public class VistaConsola {
         int dias = scanner.nextInt();
         Date fechaDevolucion = new Date(fechaReserva.getTime() + dias * 24L * 60 * 60 * 1000);
 
-        ReservaLibroDTO dto = new ReservaLibroDTO(idLibro, idCliente, fechaReserva, fechaDevolucion);
+        ReservaLibroDTO dto = new ReservaLibroDTO(null, ISBN, idCliente, fechaReserva, fechaDevolucion);
         reservaLibroController.crearReserva(dto);
         System.out.println("Reserva creada exitosamente.");
     }
@@ -306,7 +305,7 @@ public class VistaConsola {
 
         reservaLibroController.obtenerPorId(id)
                 .ifPresentOrElse(
-                        r -> System.out.println("Reserva encontrada: Libro ID " + r.getIdLibro() + ", Cliente " + r.getIdCliente()),
+                        r -> System.out.println("Reserva encontrada: ISBN Libro " + r.getIdLibro() + ", Documento del Cliente " + r.getIdCliente() + " Fecha Devolución " + r.getFechaDevolucion()),
                         () -> System.out.println("Reserva no encontrada.")
                 );
     }
@@ -317,7 +316,7 @@ public class VistaConsola {
             System.out.println("No hay reservas.");
         } else {
             System.out.println("Reservas actuales:");
-            reservas.forEach(r -> System.out.println("   • Libro ID: " + r.getIdLibro() + " | Cliente: " + r.getIdCliente() + " | Desde: " + r.getFechaReserva()));
+            reservas.forEach(r -> System.out.println("   • ID reserva: " + r.getIdReserva() + " | ISBN Libro: " + r.getIdLibro() + " | Documento del Cliente: " + r.getIdCliente() + " | Desde: " + r.getFechaReserva() + " | Devolución: " + r.getFechaDevolucion()));
         }
     }
 
@@ -326,8 +325,8 @@ public class VistaConsola {
         Integer id = scanner.nextInt();
         scanner.nextLine();
 
-        System.out.print("Nuevo ID del libro: ");
-        Integer idLibro = scanner.nextInt();
+        System.out.print("Nuevo ISBN del libro: ");
+        Integer ISBN = scanner.nextInt();
         System.out.print("Nuevo documento del cliente: ");
         Integer idCliente = scanner.nextInt();
         scanner.nextLine();
@@ -337,7 +336,7 @@ public class VistaConsola {
         int dias = scanner.nextInt();
         Date fechaDevolucion = new Date(fechaReserva.getTime() + dias * 24L * 60 * 60 * 1000);
 
-        ReservaLibroDTO dto = new ReservaLibroDTO(idLibro, idCliente, fechaReserva, fechaDevolucion);
+        ReservaLibroDTO dto = new ReservaLibroDTO(id, ISBN, idCliente, fechaReserva, fechaDevolucion);
         reservaLibroController.actualizarReserva(id, dto);
         System.out.println("Reserva actualizada.");
     }

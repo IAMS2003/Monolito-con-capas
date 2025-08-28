@@ -14,10 +14,18 @@ public class ClienteService {
 
     private final ClienteDAO clienteDAO;
     private final ClienteFabrica clienteFabrica;
+    private static ClienteService instance;
 
-    public ClienteService(ClienteDAO clienteDAO, ClienteFabrica clienteFabrica) {
-        this.clienteDAO = clienteDAO;
-        this.clienteFabrica = clienteFabrica;
+    private ClienteService() throws SQLException, ClassNotFoundException {
+        this.clienteDAO = ClienteDAO.getInstance();
+        this.clienteFabrica = ClienteFabrica.getInstance();
+    }
+
+    public static ClienteService getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new ClienteService();
+        }
+        return instance;
     }
 
     public ClienteDTO crearCliente(ClienteDTO dto) throws SQLException {
@@ -31,7 +39,7 @@ public class ClienteService {
                 dto.getCorreo(),
                 dto.getTelefono()
         );
-
+        System.out.println(cliente.getDocumentoIdentidad());
         clienteDAO.guardar(cliente);
         return dto;
     }

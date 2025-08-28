@@ -10,29 +10,36 @@ import java.util.Optional;
 
 public class ReservaLibroDAO {
     private final ConexionDB conexionDB;
+    private static ReservaLibroDAO instance;
 
-    public ReservaLibroDAO(ConexionDB conexionDB) {
-        this.conexionDB = conexionDB;
+    private ReservaLibroDAO() throws SQLException, ClassNotFoundException {
+        this.conexionDB = ConexionDB.getInstance();
+    }
+
+    public static ReservaLibroDAO getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new ReservaLibroDAO();
+        }
+        return instance;
     }
 
     public void guardar(ReservaLibro reserva) throws SQLException {
-        String sql = "INSERT INTO reservas_libros (idReservaLibro, idLibro, idCliente, fechaReserva, fechaDevolucion) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO reservas_libros (ISBN, documento_cliente, fecha_reserva, fecha_devolucion) " +
+                "VALUES (?, ?, ?, ?)";
         try (Connection conn = conexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, reserva.getIdReservaLibro());
-            ps.setInt(2, reserva.getIdLibro());
-            ps.setInt(3, reserva.getIdCliente());
-            ps.setDate(4, new java.sql.Date(reserva.getFechaReserva().getTime()));
-            ps.setDate(5, new java.sql.Date(reserva.getFechaDevolucion().getTime()));
+            ps.setInt(1, reserva.getIdLibro());
+            ps.setInt(2, reserva.getIdCliente());
+            ps.setDate(3, new java.sql.Date(reserva.getFechaReserva().getTime()));
+            ps.setDate(4, new java.sql.Date(reserva.getFechaDevolucion().getTime()));
 
             ps.executeUpdate();
         }
     }
 
     public Optional<ReservaLibro> findById(Integer idReserva) throws SQLException {
-        String sql = "SELECT * FROM reservas_libros WHERE idReservaLibro = ?";
+        String sql = "SELECT * FROM reservas_libros WHERE id_reserva_libro = ?";
         try (Connection conn = conexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -40,11 +47,11 @@ public class ReservaLibroDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     ReservaLibro reserva = new ReservaLibro.Builder()
-                            .idReservaLibro(rs.getInt("idReservaLibro"))
-                            .idLibro(rs.getInt("idLibro"))
-                            .idCliente(rs.getInt("idCliente"))
-                            .fechaReserva(rs.getDate("fechaReserva"))
-                            .fechaDevolucion(rs.getDate("fechaDevolucion"))
+                            .idReservaLibro(rs.getInt("id_reserva_libro"))
+                            .idLibro(rs.getInt("ISBN"))
+                            .idCliente(rs.getInt("documento_cliente"))
+                            .fechaReserva(rs.getDate("fecha_reserva"))
+                            .fechaDevolucion(rs.getDate("fecha_devolucion"))
                             .build();
                     return Optional.of(reserva);
                 }
@@ -63,11 +70,11 @@ public class ReservaLibroDAO {
 
             while (rs.next()) {
                 ReservaLibro reserva = new ReservaLibro.Builder()
-                        .idReservaLibro(rs.getInt("idReservaLibro"))
-                        .idLibro(rs.getInt("idLibro"))
-                        .idCliente(rs.getInt("idCliente"))
-                        .fechaReserva(rs.getDate("fechaReserva"))
-                        .fechaDevolucion(rs.getDate("fechaDevolucion"))
+                        .idReservaLibro(rs.getInt("id_reserva_libro"))
+                        .idLibro(rs.getInt("ISBN"))
+                        .idCliente(rs.getInt("documento_cliente"))
+                        .fechaReserva(rs.getDate("fecha_reserva"))
+                        .fechaDevolucion(rs.getDate("fecha_devolucion"))
                         .build();
                 reservas.add(reserva);
             }
@@ -76,8 +83,8 @@ public class ReservaLibroDAO {
     }
 
     public boolean actualizar(ReservaLibro reserva) throws SQLException {
-        String sql = "UPDATE reservas_libros SET idLibro = ?, idCliente = ?, fechaReserva = ?, fechaDevolucion = ? " +
-                "WHERE idReservaLibro = ?";
+        String sql = "UPDATE reservas_libros SET ISBN = ?, documento_cliente = ?, fecha_reserva = ?, fecha_devolucion = ? " +
+                "WHERE id_reserva_libro = ?";
         try (Connection conn = conexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -92,7 +99,7 @@ public class ReservaLibroDAO {
     }
 
     public boolean eliminar(Integer idReserva) throws SQLException {
-        String sql = "DELETE FROM reservas_libros WHERE idReservaLibro = ?";
+        String sql = "DELETE FROM reservas_libros WHERE id_reserva_libro = ?";
         try (Connection conn = conexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, idReserva);

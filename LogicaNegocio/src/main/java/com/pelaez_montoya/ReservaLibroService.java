@@ -19,12 +19,20 @@ public class ReservaLibroService {
     private final LibroDAO libroDAO;
     private final ClienteDAO clienteDAO;
     private final ReservaLibroFabrica reservaLibroFabrica;
+    private static ReservaLibroService instance;
 
-    public ReservaLibroService( ReservaLibroDAO reservaDAO, LibroDAO libroDAO, ClienteDAO clienteDAO, ReservaLibroFabrica reservaLibroFabrica) {
-        this.reservaDAO = reservaDAO;
-        this.libroDAO = libroDAO;
-        this.clienteDAO = clienteDAO;
-        this.reservaLibroFabrica = reservaLibroFabrica;
+    private ReservaLibroService() throws SQLException, ClassNotFoundException {
+        this.reservaDAO = ReservaLibroDAO.getInstance();
+        this.libroDAO = LibroDAO.getInstance();
+        this.clienteDAO = ClienteDAO.getInstance();
+        this.reservaLibroFabrica = ReservaLibroFabrica.getInstance();
+    }
+
+    public static ReservaLibroService getInstance() throws SQLException, ClassNotFoundException {
+        if (instance == null) {
+            instance = new ReservaLibroService();
+        }
+        return instance;
     }
 
     public ReservaLibroDTO crearReserva(ReservaLibroDTO dto) throws SQLException {
@@ -38,15 +46,15 @@ public class ReservaLibroService {
             throw new IllegalArgumentException("Cliente con documento " + dto.getIdCliente() + " no existe.");
         }
 
-        ReservaLibro reservaSinId = reservaLibroFabrica.crearReservaLibro(
-                null,
+        ReservaLibro reserva = reservaLibroFabrica.crearReservaLibro(
+                dto.getIdReserva(),
                 dto.getIdLibro(),
                 dto.getIdCliente(),
                 dto.getFechaReserva(),
                 dto.getFechaDevolucion()
         );
 
-        reservaDAO.guardar(reservaSinId);
+        reservaDAO.guardar(reserva);
 
         return dto;
     }
@@ -128,6 +136,7 @@ public class ReservaLibroService {
 
     private ReservaLibroDTO toDTO(ReservaLibro reserva) {
         ReservaLibroDTO dto = new ReservaLibroDTO();
+        dto.setIdReserva(reserva.getIdReservaLibro());
         dto.setIdLibro(reserva.getIdLibro());
         dto.setIdCliente(reserva.getIdCliente());
         dto.setFechaReserva(reserva.getFechaReserva());
