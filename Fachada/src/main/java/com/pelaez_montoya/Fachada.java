@@ -28,25 +28,17 @@ public class Fachada implements FachadaInterface {
     @Override
     public String enviarInformacionSubSistemas(double id, String nombres, String apellidos, String email_destino, String texto_mensaje) {
 
-        FabricaSistemaClientes fabrica = new FabricaSistemaClientes();
-        ClaseADao claseADAO = fabrica.getClaseADAO();
-        ClaseBDao claseBDao = fabrica.getClaseBDAO();
-        ClaseCDao claseCDao = fabrica.getClaseCDAO();
-
-        ClaseA objetoA = new ClaseA();
-        objetoA.setId(id);
-        objetoA.setNombres(nombres);
-        objetoA.setApellidos(apellidos);
+        ClaseA objetoA = ClaseAFabrica.getInstance().crearClaseA(id, nombres, apellidos);
         objetoA.cargarInformacionTerceros();
 
-        ClaseB objetoB = new ClaseB(email_destino, texto_mensaje);
+        ClaseB objetoB = ClaseBFabrica.getInstance().crearClaseB(email_destino, texto_mensaje);
         objetoB.mensajeEnviadoFinal();
 
-        ClaseC objetoC = new ClaseC(id + ";" + "nombres" + ";" + "apellidos "+ "\n");
+        ClaseC objetoC = ClaseCFabrica.getInstance().crearClaseC(id + ";" + "nombres" + ";" + "apellidos "+ "\n");
 
-        claseADAO.insertar(objetoA);
-        claseBDao.insertar(objetoB);
-        claseCDao.insertar(objetoC);
+        ClaseADao.getInstance().insertar(objetoA);
+        ClaseBDao.getInstance().insertar(objetoB);
+        ClaseCDao.getInstance().insertar(objetoC);
         objetoC.procesarInformacion();
 
         return "Información enviada a subsistemas exitosamente.";
@@ -54,15 +46,9 @@ public class Fachada implements FachadaInterface {
 
     @Override
     public SubsistemaInfoDto informacionEnviadaSubsistemas() {
-
-        FabricaSistemaClientes fabrica = new FabricaSistemaClientes();
-        ClaseADao claseADAO = fabrica.getClaseADAO();
-        ClaseBDao claseBDao = fabrica.getClaseBDAO();
-        ClaseCDao claseCDao = fabrica.getClaseCDAO();
-
-        List<ClaseA> listaA = claseADAO.obtenerTodos();
-        List<ClaseB> listaB = claseBDao.obtenerTodos();
-        List<ClaseC> listaC = claseCDao.obtenerTodos();
+        List<ClaseA> listaA = ClaseADao.getInstance().obtenerTodos();
+        List<ClaseB> listaB = ClaseBDao.getInstance().obtenerTodos();
+        List<ClaseC> listaC = ClaseCDao.getInstance().obtenerTodos();
 
         return new SubsistemaInfoDto(listaA, listaB, listaC);
     }
