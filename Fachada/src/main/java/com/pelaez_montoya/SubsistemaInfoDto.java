@@ -1,5 +1,7 @@
 package com.pelaez_montoya;
 
+import java.util.List;
+
 public class SubsistemaInfoDto {
     private List<ClaseA> listaA;
     private List<ClaseB> listaB;

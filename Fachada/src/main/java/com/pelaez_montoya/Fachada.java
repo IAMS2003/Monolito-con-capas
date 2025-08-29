@@ -1,7 +1,13 @@
 package com.pelaez_montoya;
 
+import com.pelaez_montoya.DAO.ClaseADao;
+import com.pelaez_montoya.DAO.ClaseBDao;
+import com.pelaez_montoya.DAO.ClaseCDao;
 import com.pelaez_montoya.Fabrica.DocumentoFabrica;
 import com.pelaez_montoya.Fabrica.DocumentoBuilder;
+
+import java.sql.SQLException;
+import java.util.List;
 
 public class Fachada implements FachadaInterface {
 
@@ -36,9 +42,13 @@ public class Fachada implements FachadaInterface {
 
         ClaseC objetoC = ClaseCFabrica.getInstance().crearClaseC(id + ";" + "nombres" + ";" + "apellidos "+ "\n");
 
-        ClaseADao.getInstance().insertar(objetoA);
-        ClaseBDao.getInstance().insertar(objetoB);
-        ClaseCDao.getInstance().insertar(objetoC);
+        try {
+            ClaseADao.getInstance().insertar(objetoA);
+            ClaseBDao.getInstance().insertar(objetoB);
+            ClaseCDao.getInstance().insertar(objetoC);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         objetoC.procesarInformacion();
 
         return "Información enviada a subsistemas exitosamente.";
@@ -46,9 +56,17 @@ public class Fachada implements FachadaInterface {
 
     @Override
     public SubsistemaInfoDto informacionEnviadaSubsistemas() {
-        List<ClaseA> listaA = ClaseADao.getInstance().obtenerTodos();
-        List<ClaseB> listaB = ClaseBDao.getInstance().obtenerTodos();
-        List<ClaseC> listaC = ClaseCDao.getInstance().obtenerTodos();
+
+        List<ClaseA> listaA = null;
+        List<ClaseB> listaB = null;
+        List<ClaseC> listaC = null;
+        try {
+            listaA = ClaseADao.getInstance().obtenerTodos();
+            listaB = ClaseBDao.getInstance().obtenerTodos();
+            listaC = ClaseCDao.getInstance().obtenerTodos();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         return new SubsistemaInfoDto(listaA, listaB, listaC);
     }
