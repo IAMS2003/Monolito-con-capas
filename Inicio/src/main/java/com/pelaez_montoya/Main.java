@@ -1,9 +1,7 @@
 package com.pelaez_montoya;
 
-import com.pelaez_montoya.Conexion.ConexionDB;
+import com.pelaez_montoya.Conexion.ConexionDBSistema;
 import com.pelaez_montoya.Conexion.InicializadorDB;
-import com.pelaez_montoya.VistaConsola;
-import com.pelaez_montoya.VistaGUI;
 
 import javax.swing.*;
 import java.sql.SQLException;
@@ -21,7 +19,7 @@ public class Main {
             InicializadorDB.iniciarConexion();
 
             // Crear conexión única
-            ConexionDB conexionDB = ConexionDB.getInstance();
+            ConexionDBSistema conexionDBSistema = ConexionDBSistema.getInstance();
 
             // ▶️ Iniciar GUI en el Event Dispatch Thread (EDT)
             SwingUtilities.invokeLater(() -> {

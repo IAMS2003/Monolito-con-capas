@@ -1,7 +1,7 @@
 package com.pelaez_montoya.DAO;
 
 import com.pelaez_montoya.ClaseAFabrica;
-import com.pelaez_montoya.Conexion.ConexionDB;
+import com.pelaez_montoya.Conexion.ConexionDBSistema;
 import com.pelaez_montoya.ClaseA;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,7 +16,7 @@ public class ClaseADao {
     private static ClaseADao instance;
 
     private ClaseADao() throws SQLException {
-        this.conexion = ConexionDB.getInstance().getConnection();
+        this.conexion = ConexionDBSistema.getInstance().getConnection();
         crearTablaSiNoExiste();
     }
 

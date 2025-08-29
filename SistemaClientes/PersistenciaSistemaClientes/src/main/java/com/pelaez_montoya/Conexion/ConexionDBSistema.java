@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class ConexionDB {
+public class ConexionDBSistema {
     private static final String DB_HOST = "localhost";
     private static final String DB_PORT = "3306";
     private static final String DB_NAME = "biblioteca_mysql";
@@ -16,10 +16,10 @@ public class ConexionDB {
     private static final String SERVER_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + PARAMS;
     private static final String DB_URL = "jdbc:mysql://" + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + PARAMS;
 
-    private static ConexionDB instance;
+    private static ConexionDBSistema instance;
     private Connection conexion;
 
-    private ConexionDB() throws SQLException {
+    private ConexionDBSistema() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
@@ -44,9 +44,9 @@ public class ConexionDB {
         }
     }
 
-    public static synchronized ConexionDB getInstance() throws SQLException {
+    public static synchronized ConexionDBSistema getInstance() throws SQLException {
         if (instance == null) {
-            instance = new ConexionDB();
+            instance = new ConexionDBSistema();
         }
         return instance;
     }
