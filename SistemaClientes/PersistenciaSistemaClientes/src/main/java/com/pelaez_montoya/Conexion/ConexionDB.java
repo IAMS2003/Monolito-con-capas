@@ -26,7 +26,7 @@ public class ConexionDB {
             crearBaseDeDatosSiNoExiste();
 
             this.conexion = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("✅ Conexión a la base de datos '" + DB_NAME + "' establecida con éxito.");
+            System.out.println("Conexión a la base de datos '" + DB_NAME + "' establecida con éxito.");
 
         } catch (ClassNotFoundException e) {
             throw new SQLException("Driver MySQL no encontrado. Asegúrate de que el conector JAR de MySQL esté en el classpath.", e);
@@ -55,7 +55,7 @@ public class ConexionDB {
         // Si la conexión se cerró o es nula, la restablece.
         if (this.conexion == null || this.conexion.isClosed()) {
             this.conexion = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("ℹ️ Conexión a MySQL restablecida.");
+            System.out.println("ℹConexión a MySQL restablecida.");
         }
         return this.conexion;
     }

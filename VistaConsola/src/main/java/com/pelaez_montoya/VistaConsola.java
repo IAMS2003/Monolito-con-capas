@@ -1,16 +1,10 @@
 package com.pelaez_montoya;
 
-import com.pelaez_montoya.ClienteController;
-import com.pelaez_montoya.LibroController;
-import com.pelaez_montoya.ReservaLibroController;
-import com.pelaez_montoya.ClienteDTO;
-import com.pelaez_montoya.LibroDTO;
-import com.pelaez_montoya.ReservaLibroDTO;
+import com.pelaez_montoya.Fabrica.DocumentoFabrica;
 
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class VistaConsola {
@@ -18,12 +12,20 @@ public class VistaConsola {
     private final ClienteController clienteController;
     private final LibroController libroController;
     private final ReservaLibroController reservaLibroController;
+    private final ControladorDocumentos controladorDocumentos;
+    private final ControladorSistemaClientes controladorSistemaClientes;
     private final Scanner scanner;
 
     public VistaConsola(Scanner scanner) throws SQLException, ClassNotFoundException {
         this.clienteController = ClienteController.getInstance();
         this.libroController = LibroController.getInstance();
         this.reservaLibroController = ReservaLibroController.getInstance();
+
+        // Instanciamos la fachada y los nuevos controladores
+        FachadaInterface fachada = new Fachada();
+        this.controladorDocumentos = new ControladorDocumentos(fachada);
+        this.controladorSistemaClientes = new ControladorSistemaClientes(fachada);
+
         this.scanner = scanner;
     }
 
@@ -33,7 +35,9 @@ public class VistaConsola {
             System.out.println("1. Gestión de Clientes");
             System.out.println("2. Gestión de Libros");
             System.out.println("3. Gestión de Reservas");
-            System.out.println("4. Salir");
+            System.out.println("4. Gestión de Documentos");
+            System.out.println("5. Sistema de Clientes (Subsistemas)");
+            System.out.println("6. Salir");
             System.out.print("Seleccione una opción: ");
 
             int opcion = obtenerOpcion();
@@ -43,14 +47,17 @@ public class VistaConsola {
                     case 1 -> menuClientes();
                     case 2 -> menuLibros();
                     case 3 -> menuReservas();
-                    case 4 -> {
+                    case 4 -> menuDocumentos();
+                    case 5 -> menuSistemaClientes();
+                    case 6 -> {
                         System.out.println("¡Hasta luego!");
                         return;
                     }
                     default -> System.out.println("Opción no válida. Intente de nuevo.");
                 }
             } catch (Exception e) {
-                System.err.println("Error: " + e.getMessage());
+                System.err.println("Ha ocurrido un error: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -359,5 +366,104 @@ public class VistaConsola {
             scanner.nextLine();
             return -1;
         }
+    }
+
+    private void menuDocumentos() {
+        System.out.println("\n--- Gestión de Documentos ---");
+        System.out.print("Contenido del documento: ");
+        String contenido = scanner.nextLine();
+
+        System.out.print("Tipo de documento (1: PDF, 2: HTML, 3: TEXTO_PLANO): ");
+        int tipoOpcion = obtenerOpcion();
+        DocumentoFabrica.TipoDocumento tipo;
+        switch (tipoOpcion) {
+            case 1:
+                tipo = DocumentoFabrica.TipoDocumento.PDF;
+                break;
+            case 2:
+                tipo = DocumentoFabrica.TipoDocumento.HTML;
+                break;
+            case 3:
+                tipo = DocumentoFabrica.TipoDocumento.TEXTO_PLANO;
+                break;
+            default:
+                System.out.println("Tipo no válido. Usando TEXTO_PLANO por defecto.");
+                tipo = DocumentoFabrica.TipoDocumento.TEXTO_PLANO;
+                break;
+        }
+
+        Documento doc = controladorDocumentos.crearDocumento(contenido, tipo);
+        System.out.println("Documento creado.");
+
+        System.out.print("¿Qué desea hacer? (1: Mostrar, 2: Imprimir): ");
+        int accion = obtenerOpcion();
+        if (accion == 1) {
+            System.out.println("\n--- Mostrando Documento ---");
+            controladorDocumentos.mostrarDocumento(doc);
+        } else if (accion == 2) {
+            System.out.println("\n--- Imprimiendo Documento ---");
+            controladorDocumentos.imprimirDocumento(doc);
+        } else {
+            System.out.println("Acción no válida.");
+        }
+    }
+
+    private void menuSistemaClientes() {
+        while (true) {
+            System.out.println("\n--- Sistema de Clientes (Subsistemas) ---");
+            System.out.println("1. Enviar Información a Subsistemas");
+            System.out.println("2. Ver Información Enviada a Subsistemas");
+            System.out.println("3. Volver al menú principal");
+            System.out.print("Seleccione una opción: ");
+
+            int opcion = obtenerOpcion();
+
+            try {
+                switch (opcion) {
+                    case 1 -> enviarInformacionSubsistemas();
+                    case 2 -> verInformacionSubsistemas();
+                    case 3 -> { return; }
+                    default -> System.out.println("Opción no válida.");
+                }
+            } catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void enviarInformacionSubsistemas() {
+        System.out.println("\n--- Enviar Información a Subsistemas ---");
+        System.out.print("ID (numérico): ");
+        double id = scanner.nextDouble();
+        scanner.nextLine(); // Consumir newline
+        System.out.print("Nombres: ");
+        String nombres = scanner.nextLine();
+        System.out.print("Apellidos: ");
+        String apellidos = scanner.nextLine();
+        System.out.print("Email de destino: ");
+        String email = scanner.nextLine();
+        System.out.print("Mensaje: ");
+        String mensaje = scanner.nextLine();
+
+        String resultado = controladorSistemaClientes.enviarInformacionSubSistemas(id, nombres, apellidos, email, mensaje);
+        System.out.println("\n" + resultado);
+    }
+
+    private void verInformacionSubsistemas() {
+        System.out.println("\n--- Ver Información Enviada a Subsistemas ---");
+        SubsistemaInfoDto info = controladorSistemaClientes.obtenerInformacionSubsistemas();
+
+        System.out.println("\n--- Datos del Subsistema A (Contabilidad) ---");
+        if (info.getListaA() == null || info.getListaA().isEmpty()) System.out.println("No hay datos.");
+        else info.getListaA().forEach(a -> System.out.println("ID: " + a.getId() + ", Nombre: " + a.getNombres() + " " + a.getApellidos()));
+
+        System.out.println("\n--- Datos del Subsistema B (Mensajería) ---");
+        if (info.getListaB() == null || info.getListaB().isEmpty()) System.out.println("No hay datos.");
+        else info.getListaB().forEach(b -> System.out.println("Destino: " + b.getDestino() + ", Mensaje: " + b.getMensaje()));
+
+        System.out.println("\n--- Datos del Subsistema C (Configuración) ---");
+        if (info.getListaC() == null || info.getListaC().isEmpty()) System.out.println("No hay datos.");
+        else info.getListaC().forEach(c -> System.out.println("Configuración: " + c.getTexto()));
     }
 }

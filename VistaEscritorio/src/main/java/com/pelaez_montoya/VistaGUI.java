@@ -1,17 +1,10 @@
 package com.pelaez_montoya;
 
-import com.pelaez_montoya.ClienteController;
-import com.pelaez_montoya.LibroController;
-import com.pelaez_montoya.ReservaLibroController;
-import com.pelaez_montoya.ClienteDTO;
-import com.pelaez_montoya.LibroDTO;
-import com.pelaez_montoya.ReservaLibroDTO;
+import com.pelaez_montoya.Fabrica.DocumentoFabrica;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +15,8 @@ public class VistaGUI extends JFrame {
     private final ClienteController clienteController;
     private final LibroController libroController;
     private final ReservaLibroController reservaLibroController;
+    private final ControladorDocumentos controladorDocumentos;
+    private final ControladorSistemaClientes controladorSistemaClientes;
 
     // Componentes - Clientes
     private JTextField txtDocCliente, txtNombreCliente, txtApellidoCliente, txtEdadCliente, txtCorreoCliente, txtTelefonoCliente;
@@ -41,10 +36,24 @@ public class VistaGUI extends JFrame {
     private JTable tablaReservas;
     private DefaultTableModel modeloReservas;
 
+    // Componentes - Documentos
+    private JComboBox<DocumentoFabrica.TipoDocumento> comboTipoDocumento;
+    private JTextArea areaContenidoDocumento;
+    private JButton btnMostrarDocumento, btnImprimirDocumento;
+    private JTextArea areaResultadoDocumento;
+
+    // Componentes - Subsistemas
+    private JTextField txtIdSubsistema, txtNombresSubsistema, txtApellidosSubsistema, txtEmailSubsistema, txtMensajeSubsistema;
+    private JButton btnEnviarSubsistema, btnListarSubsistema;
+    private JTextArea areaResultadoSubsistema;
+
     public VistaGUI() throws SQLException, ClassNotFoundException {
         this.clienteController = ClienteController.getInstance();
         this.libroController = LibroController.getInstance();
         this.reservaLibroController = ReservaLibroController.getInstance();
+        FachadaInterface fachada = new Fachada();
+        this.controladorDocumentos = new ControladorDocumentos(fachada);
+        this.controladorSistemaClientes = new ControladorSistemaClientes(fachada);
 
         setTitle("Biblioteca - Sistema de Gestión");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -57,6 +66,8 @@ public class VistaGUI extends JFrame {
         tabbedPane.addTab("Clientes", crearPanelClientes());
         tabbedPane.addTab("Libros", crearPanelLibros());
         tabbedPane.addTab("Reservas", crearPanelReservas());
+        tabbedPane.addTab("Documentos", crearPanelDocumentos());
+        tabbedPane.addTab("Subsistemas", crearPanelSubsistemas());
 
         add(tabbedPane);
     }
@@ -462,5 +473,154 @@ public class VistaGUI extends JFrame {
     // ▶️ Método auxiliar
     private void limpiarTabla(DefaultTableModel modelo) {
         modelo.setRowCount(0);
+    }
+
+    // ▶️ PANEL DOCUMENTOS
+    private JPanel crearPanelDocumentos() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel formPanel = new JPanel(new BorderLayout(5, 5));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Crear Documento"));
+
+        JPanel topForm = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topForm.add(new JLabel("Tipo de Documento:"));
+        comboTipoDocumento = new JComboBox<>(DocumentoFabrica.TipoDocumento.values());
+        topForm.add(comboTipoDocumento);
+        formPanel.add(topForm, BorderLayout.NORTH);
+
+        areaContenidoDocumento = new JTextArea(5, 40);
+        formPanel.add(new JScrollPane(areaContenidoDocumento), BorderLayout.CENTER);
+        panel.add(formPanel, BorderLayout.NORTH);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        btnMostrarDocumento = new JButton("Mostrar");
+        btnImprimirDocumento = new JButton("Imprimir");
+        buttonPanel.add(btnMostrarDocumento);
+        buttonPanel.add(btnImprimirDocumento);
+        panel.add(buttonPanel, BorderLayout.CENTER);
+
+        areaResultadoDocumento = new JTextArea(15, 60);
+        areaResultadoDocumento.setEditable(false);
+        areaResultadoDocumento.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        JScrollPane scrollPane = new JScrollPane(areaResultadoDocumento);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Resultado"));
+        panel.add(scrollPane, BorderLayout.SOUTH);
+
+        btnMostrarDocumento.addActionListener(e -> procesarDocumento(true));
+        btnImprimirDocumento.addActionListener(e -> procesarDocumento(false));
+
+        return panel;
+    }
+
+    private void procesarDocumento(boolean esMostrar) {
+        try {
+            String contenido = areaContenidoDocumento.getText();
+            DocumentoFabrica.TipoDocumento tipo = (DocumentoFabrica.TipoDocumento) comboTipoDocumento.getSelectedItem();
+
+            if (contenido.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El contenido no puede estar vacío.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Documento doc = controladorDocumentos.crearDocumento(contenido, tipo);
+            String resultado = esMostrar ? controladorDocumentos.mostrarDocumento(doc) : controladorDocumentos.imprimirDocumento(doc);
+            areaResultadoDocumento.setText(resultado);
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+    // ▶️ PANEL SUBSISTEMAS
+    private JPanel crearPanelSubsistemas() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel formPanel = new JPanel(new GridLayout(5, 2, 5, 5));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Enviar Información a Subsistemas"));
+        formPanel.add(new JLabel("ID (numérico):"));
+        txtIdSubsistema = new JTextField();
+        formPanel.add(txtIdSubsistema);
+        formPanel.add(new JLabel("Nombres:"));
+        txtNombresSubsistema = new JTextField();
+        formPanel.add(txtNombresSubsistema);
+        formPanel.add(new JLabel("Apellidos:"));
+        txtApellidosSubsistema = new JTextField();
+        formPanel.add(txtApellidosSubsistema);
+        formPanel.add(new JLabel("Email Destino:"));
+        txtEmailSubsistema = new JTextField();
+        formPanel.add(txtEmailSubsistema);
+        formPanel.add(new JLabel("Mensaje:"));
+        txtMensajeSubsistema = new JTextField();
+        formPanel.add(txtMensajeSubsistema);
+
+        JPanel topButtonPanel = new JPanel(new FlowLayout());
+        btnEnviarSubsistema = new JButton("Enviar a Subsistemas");
+        topButtonPanel.add(btnEnviarSubsistema);
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(formPanel, BorderLayout.NORTH);
+        centerPanel.add(topButtonPanel, BorderLayout.CENTER);
+        panel.add(centerPanel, BorderLayout.NORTH);
+
+        JPanel resultPanel = new JPanel(new BorderLayout());
+        btnListarSubsistema = new JButton("Cargar Información de Subsistemas");
+        resultPanel.add(btnListarSubsistema, BorderLayout.NORTH);
+        areaResultadoSubsistema = new JTextArea(15, 60);
+        areaResultadoSubsistema.setEditable(false);
+        areaResultadoSubsistema.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        resultPanel.add(new JScrollPane(areaResultadoSubsistema), BorderLayout.CENTER);
+        panel.add(resultPanel, BorderLayout.CENTER);
+
+        btnEnviarSubsistema.addActionListener(e -> enviarASubsistemas());
+        btnListarSubsistema.addActionListener(e -> listarDeSubsistemas());
+
+        return panel;
+    }
+
+    private void enviarASubsistemas() {
+        try {
+            double id = Double.parseDouble(txtIdSubsistema.getText());
+            String nombres = txtNombresSubsistema.getText();
+            String apellidos = txtApellidosSubsistema.getText();
+            String email = txtEmailSubsistema.getText();
+            String mensaje = txtMensajeSubsistema.getText();
+
+            if (nombres.trim().isEmpty() || apellidos.trim().isEmpty() || email.trim().isEmpty() || mensaje.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String resultado = controladorSistemaClientes.enviarInformacionSubSistemas(id, nombres, apellidos, email, mensaje);
+            JOptionPane.showMessageDialog(this, resultado);
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "El ID debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+    private void listarDeSubsistemas() {
+        try {
+            SubsistemaInfoDto info = controladorSistemaClientes.obtenerInformacionSubsistemas();
+            StringBuilder sb = new StringBuilder();
+            sb.append("--- Datos del Subsistema A (Contabilidad) ---\n");
+            if (info.getListaA() == null || info.getListaA().isEmpty()) sb.append("No hay datos.\n");
+            else info.getListaA().forEach(a -> sb.append("ID: ").append(a.getId()).append(", Nombre: ").append(a.getNombres()).append(" ").append(a.getApellidos()).append("\n"));
+            sb.append("\n--- Datos del Subsistema B (Mensajería) ---\n");
+            if (info.getListaB() == null || info.getListaB().isEmpty()) sb.append("No hay datos.\n");
+            else info.getListaB().forEach(b -> sb.append("Destino: ").append(b.getDestino()).append(", Mensaje: ").append(b.getMensaje()).append("\n"));
+            sb.append("\n--- Datos del Subsistema C (Configuración) ---\n");
+            if (info.getListaC() == null || info.getListaC().isEmpty()) sb.append("No hay datos.\n");
+            else info.getListaC().forEach(c -> sb.append("Configuración: ").append(c.getTexto()).append("\n"));
+            areaResultadoSubsistema.setText(sb.toString());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al cargar la información: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 }

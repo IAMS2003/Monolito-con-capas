@@ -40,7 +40,7 @@ public class Fachada implements FachadaInterface {
         ClaseB objetoB = ClaseBFabrica.getInstance().crearClaseB(email_destino, texto_mensaje);
         objetoB.mensajeEnviadoFinal();
 
-        ClaseC objetoC = ClaseCFabrica.getInstance().crearClaseC(id + ";" + "nombres" + ";" + "apellidos "+ "\n");
+        ClaseC objetoC = ClaseCFabrica.getInstance().crearClaseC(id + ";" + nombres + ";" + apellidos + "\n");
 
         try {
             ClaseADao.getInstance().insertar(objetoA);
