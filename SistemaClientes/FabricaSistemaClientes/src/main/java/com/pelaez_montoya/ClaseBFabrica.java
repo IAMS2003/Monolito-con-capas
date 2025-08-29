@@ -7,7 +7,7 @@ public class ClaseBFabrica {
 
     public static synchronized ClaseBFabrica getInstance() {
         if (instance == null) {
-            instance = new ClaseBFactory();
+            instance = new ClaseBFabrica();
         }
         return instance;
     }

@@ -1,5 +1,6 @@
 package com.pelaez_montoya.DAO;
 
+import com.pelaez_montoya.ClaseAFabrica;
 import com.pelaez_montoya.Conexion.ConexionDB;
 import com.pelaez_montoya.ClaseA;
 import java.sql.Connection;
@@ -61,10 +62,11 @@ public class ClaseADao {
         try (Statement stmt = conexion.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while(rs.next()){
-                ClaseA claseA = new ClaseA();
-                claseA.setId(rs.getDouble("id"));
-                claseA.setNombres(rs.getString("nombres"));
-                claseA.setApellidos(rs.getString("apellidos"));
+                ClaseA claseA = ClaseAFabrica.getInstance().crearClaseA(
+                        rs.getDouble("id"),
+                        rs.getString("nombres"),
+                        rs.getString("apellidos")
+                );
                 lista.add(claseA);
             }
         } catch(SQLException e) {
